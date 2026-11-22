@@ -2,15 +2,18 @@
 
 Never lose your minimap tracking again.
 
-TrackKeeper remembers the tracking you chose (Find Herbs, Find Minerals, Find Fish,
-Track Humanoids, hunter tracks...) and turns it back on whenever the game drops it:
+TrackKeeper remembers your gathering tracking (Find Herbs, Find Minerals,
+Find Treasure, Find Fish) and turns it back on whenever the game drops it:
 after dying, logging in, zoning or shapeshifting.
 
 ## How it works
-- Pick a tracking from the minimap menu or cast the tracking spell: TrackKeeper remembers it.
-- Turn it off yourself: TrackKeeper forgets it.
-- If the game turns it off: TrackKeeper turns it back on (after combat, once you are alive).
-- If your game version allows only one gathering tracking at a time, your most recent choice wins.
+- It remembers the last gathering tracking it saw turned on: Find Herbs, Find Minerals,
+  Find Treasure or Find Fish. Switch to another one and that becomes the one kept.
+- When no tracking is active at all, it turns the remembered one back on
+  (after combat, once you are alive, and after you leave a shapeshift form).
+- While another tracking such as Track Humanoids is on (e.g. in Cat Form), it does not
+  interfere; your gathering tracking comes back once that one is off.
+- Want tracking to stay off? Use `/tk off`.
 
 No setup, no options window. Settings are saved per character.
 
@@ -18,3 +21,4 @@ No setup, no options window. Settings are saved per character.
 - `/tk` show status
 - `/tk on` / `/tk off` enable or disable
 - `/tk reset` forget remembered tracking
+- `/tk debug` toggle the debug log (saved in `TrackKeeperDB.log`)
