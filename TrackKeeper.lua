@@ -96,6 +96,29 @@ local function scheduleRestore(source)
   C_Timer.After(1, function() restore(source) end)
 end
 
+-- Shared by /tk and the addon compartment menu.
+local function setEnabled(on, source)
+  DB.enabled = on
+  msg(on and "enabled" or "disabled")
+  if on then restore(source) end
+end
+
+local function resetWanted()
+  DB.wanted = nil
+  msg("forgot remembered tracking. Turn on a gathering tracking to remember it.")
+end
+
+local function keepingText()
+  local t = DB.wanted and findTracking(DB.wanted)
+  return "Keeping: " .. (t and t.name or (DB.wanted and ("spell " .. DB.wanted)) or "nothing yet")
+end
+
+local function statusText()
+  return DB.enabled and keepingText() or "Disabled"
+end
+
+local COMMANDS = "commands: /tk on, /tk off, /tk reset, /tk debug"
+
 local f = CreateFrame("Frame")
 f:RegisterEvent("ADDON_LOADED")
 f:SetScript("OnEvent", function(_, event, ...)
@@ -115,6 +138,7 @@ f:SetScript("OnEvent", function(_, event, ...)
       DB.wanted = nil
     end
     log("loaded: wanted=" .. tostring(DB.wanted) .. ", enabled=" .. tostring(DB.enabled))
+    log("compartment=" .. tostring(AddonCompartmentFrame ~= nil) .. ", MenuUtil=" .. tostring(MenuUtil ~= nil))
 
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
     f:RegisterEvent("MINIMAP_UPDATE_TRACKING")
@@ -144,23 +168,58 @@ SLASH_TRACKKEEPER1 = "/trackkeeper"
 SLASH_TRACKKEEPER2 = "/tk"
 SlashCmdList.TRACKKEEPER = function(arg)
   arg = (arg or ""):lower()
-  if arg == "on" then
-    DB.enabled = true
-    msg("enabled")
-    restore("/tk on")
-  elseif arg == "off" then
-    DB.enabled = false
-    msg("disabled")
+  if arg == "on" or arg == "off" then
+    setEnabled(arg == "on", "/tk " .. arg)
   elseif arg == "debug" then
     DB.debug = not DB.debug
     msg("debug " .. (DB.debug and "on (log saved in TrackKeeperDB.log on /reload or logout)" or "off"))
   elseif arg == "reset" then
-    DB.wanted = nil
-    msg("forgot remembered tracking. Turn on a gathering tracking to remember it.")
+    resetWanted()
   else
-    local t = DB.wanted and findTracking(DB.wanted)
-    local name = t and t.name or (DB.wanted and ("spell " .. DB.wanted)) or "nothing yet"
-    msg((DB.enabled and "enabled" or "disabled") .. ". Keeping: " .. name)
-    msg("commands: /tk on, /tk off, /tk reset, /tk debug")
+    msg((DB.enabled and "enabled" or "disabled") .. ". " .. keepingText())
+    msg(COMMANDS)
   end
+end
+
+-- Addon compartment (minimap addon menu), named in TrackKeeper.toc.
+-- The game passes the compartment button frame as the last argument.
+local function ownerFrame(...)
+  for i = select("#", ...), 1, -1 do
+    local v = select(i, ...)
+    if type(v) == "table" then return v end
+  end
+end
+
+function TrackKeeper_OnAddonCompartmentClick(addonName, buttonName, menuButtonFrame)
+  if not DB then return end
+  if buttonName == "RightButton" then
+    if MenuUtil and MenuUtil.CreateContextMenu then
+      MenuUtil.CreateContextMenu(menuButtonFrame, function(_, root)
+        root:CreateTitle(statusText())
+        root:CreateButton(DB.enabled and "Disable" or "Enable", function() setEnabled(not DB.enabled, "menu") end)
+        root:CreateButton("Reset remembered tracking", resetWanted)
+      end)
+    else
+      msg(statusText())
+      msg(COMMANDS)
+    end
+  else
+    setEnabled(not DB.enabled, "compartment")
+  end
+end
+
+function TrackKeeper_OnAddonCompartmentEnter(addonName, ...)
+  local frame = ownerFrame(...)
+  if not (DB and frame and GameTooltip) then return end
+  GameTooltip:SetOwner(frame, "ANCHOR_LEFT")
+  GameTooltip:AddLine("TrackKeeper")
+  GameTooltip:AddLine(statusText(), 1, 1, 1)
+  GameTooltip:AddLine(" ")
+  GameTooltip:AddLine("Left-click: enable/disable")
+  GameTooltip:AddLine("Right-click: menu")
+  GameTooltip:Show()
+end
+
+function TrackKeeper_OnAddonCompartmentLeave()
+  if GameTooltip then GameTooltip:Hide() end
 end

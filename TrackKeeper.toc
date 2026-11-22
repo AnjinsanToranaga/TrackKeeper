@@ -2,8 +2,11 @@
 ## Title: TrackKeeper
 ## Notes: Remembers your gathering tracking (Find Herbs, Find Minerals, ...) and turns it back on when the game drops it.
 ## Author: Baran
-## Version: 1.0.1
+## Version: 1.1.0
 ## IconTexture: Interface\AddOns\TrackKeeper\icon
+## AddonCompartmentFunc: TrackKeeper_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: TrackKeeper_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: TrackKeeper_OnAddonCompartmentLeave
 ## SavedVariablesPerCharacter: TrackKeeperDB
 
 TrackKeeper.lua

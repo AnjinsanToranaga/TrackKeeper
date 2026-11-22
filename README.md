@@ -17,6 +17,11 @@ after dying, logging in, zoning or shapeshifting.
 
 No setup, no options window. Settings are saved per character.
 
+## Minimap addon menu
+TrackKeeper appears in the minimap addon menu (the addon compartment).
+- Left-click: enable or disable.
+- Right-click: menu with the remembered tracking, Enable/Disable and Reset remembered tracking.
+
 ## Commands
 - `/tk` show status
 - `/tk on` / `/tk off` enable or disable
